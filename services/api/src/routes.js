@@ -4,14 +4,40 @@ const axios = require('axios').default;
 
 
 // TODO Exercise 1: Implement healthcheck path GET /healthz
-routes.get('/healthz', async (req, res) => {
-    // Send a response back to the client
-    res.status(200).send('Successful health check response with status 200\n');
+// routes.get('/healthz', async (req, res) => {
+//     // Send a response back to the client
+//     res.status(200).send('Successful health check response with status 200\n');
 
-});
+// });
 
 // TODO Exercise 2 "Resiliency": Simulate service failure
-// ...
+let isHealthy = true;
+let healthTimeout;
+
+routes.get('/healthz', (req, res) => {
+    if (isHealthy) {
+        res.status(200).send('Service is healthy');
+    } else {
+        res.status(500).send('Service is unhealthy');
+    }
+});
+
+routes.post('/toggle-health', (req, res) => {
+    isHealthy = !isHealthy;
+
+    // Clear any existing timeout to avoid multiple resets
+    clearTimeout(healthTimeout);
+
+    // If the service is now unhealthy, set it to automatically recover after 2 minutes
+    if (!isHealthy) {
+        healthTimeout = setTimeout(() => {
+            isHealthy = true;
+            console.log('Automatically set health to true after 2 minutes');
+        }, 120 * 1000);
+    }
+
+    res.status(200).send(`Health toggled. Current state: ${isHealthy ? 'healthy' : 'unhealthy'}`);
+});
 
 routes.post('/content-request', async (req, res) => {
     const contentRequest = req.body;

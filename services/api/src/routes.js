@@ -1,5 +1,6 @@
 const express = require('express');
 const routes = express.Router();
+const axios = require('axios').default;
 
 
 // TODO Exercise 1: Implement healthcheck path GET /healthz
@@ -22,13 +23,31 @@ routes.post('/content-request', async (req, res) => {
 
     // TODO Exercise 2: Use axios to send the content request to the content service
     // -- replace the dummy response below
-    // ...
+    try {
+        const response
+            = await axios({
+                method: 'POST',
+                url: 'http://content/request',
+                data: contentRequest,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+        const request
+            = response.data;
+
+        console.log(`RequestId received from Content Service: '${request.id}'`);
+
+        res.send(request);
+    } catch (error) {
+        console.error('Error storing contentRequest', error);
+        res.status(500).send('Error storing contentRequest');
+    }
+
 
     // TODO Exercise 4: Send messages to SNS via the AWS SDK for SNS (according to example in exercise description)
     // ...
-
-    // Send a response back to the client
-    res.status(200).send('Successful (dummy) response with status 200\n');
 
 });
 

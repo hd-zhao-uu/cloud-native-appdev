@@ -1,5 +1,11 @@
 services:
 # TODO: Exercise 2: Add services for api- and content services.
+    api:
+        build: ../api/
+        ports:
+            - "80:80"
+    content:
+        build: ../content
 
 # TODO: Exercise 3: Uncomment to launch DynamoDB locally
 #  dynamodb-local:

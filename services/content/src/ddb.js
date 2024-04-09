@@ -1,6 +1,6 @@
-const { DynamoDBClient  } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, GetCommand  } = require("@aws-sdk/lib-dynamodb");
-const env       = require('./env');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, GetCommand } = require("@aws-sdk/lib-dynamodb");
+const env = require('./env');
 const crypto = require('crypto');
 
 const dynamoDbClientConfig = {
@@ -22,7 +22,25 @@ async function storeRequest (requestData) {
 
     // TODO Exercise 3: Store the request to dynamoDB
     // ...
+    const item = {
+        TableName: env.ddbTable,
+        Item: {
+            requestId: id,
+            data: {
+                ...requestData,
+                state: 'pending',
+                ts: new Date().toISOString()
+            }
+        }
+    };
 
+    try {
+        await docClient.send(new PutCommand(item));
+        return { status: 201, data: { id } };
+    } catch (error) {
+        console.error("Error saving data to DynamoDB", error);
+        return { status: 500, data: 'Error storing resource' };
+    }
 }
 
 async function fetchRequestById(requestId) {
@@ -36,12 +54,14 @@ async function fetchRequestById(requestId) {
 
     try {
         const { Item } = await docClient.send(new GetCommand(params));
-        return Item ? { status: 200, data: {
+        return Item ? {
+            status: 200, data: {
                 ...Item.data,
                 requestId: Item.requestId
-                }}
+            }
+        }
             :
-                { status: 404, data: 'Not Found' };
+            { status: 404, data: 'Not Found' };
     } catch (error) {
         console.error("Error fetching data from DynamoDB", error);
         return { status: 500, data: 'Error fetching resource' };

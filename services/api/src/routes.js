@@ -16,7 +16,7 @@ routes.get('/healthz', async (req, res) => {
 routes.post('/content-request', async (req, res) => {
     const contentRequest = req.body;
 
-    // Simple validation - check for existence of languaeg and fields
+    // Simple validation - check for existence of language and fields
     if (!contentRequest.language || !contentRequest.fields) {
         return res.status(400).send('Invalid content request.');
     }
@@ -34,8 +34,7 @@ routes.post('/content-request', async (req, res) => {
                 }
             });
 
-        const request
-            = response.data;
+        const request = response.data;
 
         console.log(`RequestId received from Content Service: '${request.id}'`);
 
@@ -55,9 +54,15 @@ routes.get('/content-request/:id', async (req, res) => {
 
     // TODO Exercise 3: Fetch an existing request
     // -- replace the dummy response below
-    // ...
-    res.status(404).send("Call to content service needs to be implemented.")
+    const requestId = req.params.id;
 
+    try {
+        const response = await axios.get(`http://content/request/${requestId}`);
+        res.send(response.data);
+    } catch (error) {
+        console.error(`Error fetching contentRequest with id ${requestId}:`, error);
+        res.status(error.response.status).send(`Error fetching contentRequest with id ${requestId}`);
+    }
 });
 
 module.exports = routes;

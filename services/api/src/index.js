@@ -1,6 +1,6 @@
-const express   = require('express');
-const env       = require('./env');
-const routes    = require('./routes');
+const express = require('express');
+const env = require('./env');
+const routes = require('./routes');
 
 const app = express();
 app.use(express.json());
@@ -13,3 +13,12 @@ const server = app.listen(env.port, () => {
 
 // TODO Exercise 1: Use Sigterm handling to shut down gracefully
 // ...
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, about to shut down TMS API!');
+
+    server.close(() => {
+        console.log("TMS API shut down gracefully!")
+        process.exit(0);
+
+    });
+});

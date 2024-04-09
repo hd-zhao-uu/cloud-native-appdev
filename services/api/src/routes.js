@@ -3,7 +3,11 @@ const routes = express.Router();
 
 
 // TODO Exercise 1: Implement healthcheck path GET /healthz
-// ...
+routes.get('/healthz', async (req, res) => {
+    // Send a response back to the client
+    res.status(200).send('Successful health check response with status 200\n');
+
+});
 
 // TODO Exercise 2 "Resiliency": Simulate service failure
 // ...
@@ -24,7 +28,7 @@ routes.post('/content-request', async (req, res) => {
     // ...
 
     // Send a response back to the client
-    res.status(200).send('Successful (dummy) response with status 200');
+    res.status(200).send('Successful (dummy) response with status 200\n');
 
 });
 

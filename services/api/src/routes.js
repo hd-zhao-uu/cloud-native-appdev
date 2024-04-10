@@ -1,6 +1,8 @@
 const express = require('express');
 const routes = express.Router();
 const axios = require('axios').default;
+const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
+const client = new SNSClient({ region: "eu-north-1" });
 
 
 // TODO Exercise 1: Implement healthcheck path GET /healthz
@@ -72,7 +74,37 @@ routes.post('/content-request', async (req, res) => {
 
 
     // TODO Exercise 4: Send messages to SNS via the AWS SDK for SNS (according to example in exercise description)
-    // ...
+
+    const { requestsTopic } = JSON.parse(process.env.COPILOT_SNS_TOPIC_ARNS);
+
+
+    try {
+        const response
+            = await axios({
+            method: 'POST',
+            url: 'http://content/request',
+            data: contentRequest,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const request
+            = response.data;
+
+        await client.send(new PublishCommand({
+            Message: JSON.stringify(request.id),
+            TopicArn: requestsTopic
+        }));
+
+        // console.log('Content Request ID ' + request.id + ' published to SNS.');
+
+        res.send(request);
+
+    } catch (error) {
+        console.error('Error storing contentRequest', error);
+        res.status(500).send('Error storing contentRequest');
+    }
 
 });
 
